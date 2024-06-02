@@ -1,10 +1,13 @@
 name: CI
 
-on: [push, workflow_dispatch]
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"  # Menjadwalkan workflow untuk berjalan setiap 6 jam
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
