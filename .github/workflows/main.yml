@@ -63,12 +63,12 @@ jobs:
       run: |
         Write-Host "Starting Ngrok tunnel..."
         .\ngrok\ngrok.exe tcp 3389 --log=stdout > ngrok.log 2>&1 &
+        Start-Sleep -Seconds 15  # Wait for ngrok to establish the connection
         Write-Host "Ngrok tunnel started."
-      env:
-        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
 
-    - name: Keep Ngrok Tunnel Alive
+    - name: Display Ngrok URL
       run: |
-        Write-Host "Keeping Ngrok tunnel alive..."
-        Start-Sleep -Seconds 21540  # Keep alive for just under 6 hours (359 minutes)
-        Write-Host "Ngrok tunnel session ending soon."
+        Write-Host "Extracting Ngrok URL from log..."
+        $ngrokLog = Get-Content -Path ngrok.log -Raw
+        $url = $ngrokLog -match 'url=(tcp://[^\s]+)' | Out-Null; $matches[1]
+        Write-Host "Ngrok URL: $url"
