@@ -70,5 +70,5 @@ jobs:
     - name: Keep Ngrok Tunnel Alive
       run: |
         Write-Host "Keeping Ngrok tunnel alive..."
-        sleep 359m  # Keep alive for just under 6 hours
+        Start-Sleep -Seconds 21540  # Keep alive for just under 6 hours (359 minutes)
         Write-Host "Ngrok tunnel session ending soon."
