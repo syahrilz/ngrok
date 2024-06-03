@@ -16,38 +16,59 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Download Ngrok
-      run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+      run: |
+        Write-Host "Downloading Ngrok..."
+        Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+        Write-Host "Ngrok downloaded."
 
     - name: Extract Ngrok
-      run: Expand-Archive ngrok.zip -DestinationPath ngrok
+      run: |
+        Write-Host "Extracting Ngrok..."
+        Expand-Archive ngrok.zip -DestinationPath ngrok
+        Write-Host "Ngrok extracted."
 
     - name: Authenticate Ngrok
-      run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+      run: |
+        Write-Host "Authenticating Ngrok..."
+        .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+        Write-Host "Ngrok authenticated."
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
 
     - name: Enable RDP in the registry
       run: |
+        Write-Host "Enabling RDP in the registry..."
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-        Write-Host "RDP Enabled in the registry"
+        Write-Host "RDP enabled in the registry."
 
     - name: Enable RDP in the firewall
       run: |
+        Write-Host "Enabling RDP in the firewall..."
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-        Write-Host "RDP rule enabled in the firewall"
+        Write-Host "RDP rule enabled in the firewall."
 
     - name: Set RDP User Authentication
       run: |
+        Write-Host "Setting RDP user authentication..."
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
-        Write-Host "RDP user authentication set"
+        Write-Host "RDP user authentication set."
 
     - name: Set Password for runneradmin
       run: |
+        Write-Host "Setting password for runneradmin..."
         Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
-        Write-Host "Password for runneradmin set"
+        Write-Host "Password for runneradmin set."
 
     - name: Start Ngrok Tunnel
       run: |
-        .\ngrok\ngrok.exe tcp 3389 --log=stdout
+        Write-Host "Starting Ngrok tunnel..."
+        .\ngrok\ngrok.exe tcp 3389 --log=stdout > ngrok.log 2>&1 &
+        Write-Host "Ngrok tunnel started."
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+
+    - name: Keep Ngrok Tunnel Alive
+      run: |
+        Write-Host "Keeping Ngrok tunnel alive..."
+        sleep 359m  # Keep alive for just under 6 hours
+        Write-Host "Ngrok tunnel session ending soon."
